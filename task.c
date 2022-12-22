@@ -43,18 +43,69 @@ void help(char *command)
         "\t-o\tChoose sort order (asc | desc)\n\n", 
         command);
 }
-/*void event_output(Event local)
+int compare_qsort_id_up(const Event *p1, const Event *p2)
 {
-	fprintf(file_output, "---\n");
-	fprintf(file_output, "%i\n", local.id);
-	fprintf(file_output, "%i\n", local.level);
-	fprintf(file_output, "%s\n", local.str);
-}*/
+	return p2->id -p1->id;
+}
+int compare_qsort_id_down(const Event *p1, const Event *p2)
+{
+	return p1->id- p2->id;
+}
+int compare_qsort_level_up(const Event *p1, const Event *p2)
+{
+	return p2->level -p1->level;
+}
+int compare_qsort_level_down(const Event *p1, const Event *p2)
+{
+	return p1->level - p2->level;
+}
+int compare_qsort_str_up(const Event *p1, const Event *p2)
+{
+	/*char* str1 = p1->str;
+	char*str2 = p2->str;
+	while(*str1==*str2)
+	{
+		str1++;
+		str2++;
+	}
+	return *str2 - *str1;*/
+	return *p2->str - *p1->str;
+}
+int compare_qsort_str_down(const Event *p1, const Event *p2)
+{
+	
+	/*char* str1 = p1->str;
+	char*str2 = p2->str;
+	while(*str1==*str2)
+	{
+		str1++;
+		str2++;
+	}
+	return *str1 - *str2;*/
+	return *p1->str - *p2->str;
+}
 
+void selection_sort(Event* event, int number_event, int(*compare_qsort_id_up)(const Event*, const Event*))
+{
+	int min;
+	Event tmp;
+	for(int i = 0; i<number_event-1; i++)
+	{
+		min = i;
+		for(int j = i; j< number_event; j++)
+		{
+			if(compare_qsort_id_up(&event[j], &event[min])<0)
+			{
+				min = j;
+			}
+		}
+		tmp = event[i];
+		event[i] = event[min];
+		event[min] = tmp;
+	}
+}
 int main(int argc, char *argv[])
 {
-
-	//char * allow ="QqWwEeRrTtYyUuIiOoPpAaSsDdFfGgHhJjKkLlZzXxCcVvBbNnMm- ";
 	char * numbers = "1234567890";
 
 	char* str = NULL;
@@ -84,9 +135,8 @@ int main(int argc, char *argv[])
 
         	case 'a':
 	        	if ((strcmp(optarg, "qsort") == 0) || (strcmp(optarg, "quick_sort") == 0) || (strcmp(optarg, "selection_sort") == 0))
-			{//str?
+			{
 				algo = optarg;
-			        printf("%s\n", algo);
 			}
 			else
 		                err = c;
@@ -96,14 +146,13 @@ int main(int argc, char *argv[])
         		if ((strcmp(optarg, "id") == 0) || (strcmp(optarg, "level") == 0) || (strcmp(optarg, "str") == 0))
 			{
 				field = optarg;
-				printf("%s\n", field);
 			}
 			else
 				err = c;
 			break;
 
 	        case 'o':
-        		if ((strcmp(optarg, "asc") == 0) || (strcmp(optarg, "desc") == 0))
+        		if ((strcmp(optarg, "up") == 0) || (strcmp(optarg, "down") == 0))
 			{
 				order = optarg;
 				printf("%s\n", optarg);
@@ -120,7 +169,6 @@ int main(int argc, char *argv[])
 			break;
 		case ':':
 			printf("Missing arg for %c\n", optopt);
-
 		}
 	}
 
@@ -211,17 +259,114 @@ int main(int argc, char *argv[])
 		event[number_events - 1] = event_new(id, level, line);
 
         }
-
-	
-	for(int i =0; i < number_events; i++)
+	if(strcmp(algo, "qsort")==0)
 	{
-		event_printf(event[i]);
-		printf("\n");
+		if(strcmp(field, "id")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_id_up);
+			}
+			else
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_id_down);
+			}
+		}
+		else if(strcmp(field, "level")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_level_up);
+			}
+			else
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_level_down);
+			}
+		}
+		else
+		{
+			if(strcmp(order, "up")==0)
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_str_up);
+			}
+			else
+			{
+				qsort(event, number_events, sizeof(*event), (int(*)(const void*, const void*))compare_qsort_str_down);
+			}
+		}
 	}
+	else if(strcmp(algo, "quick_sort")==0)
+	{	
+		if(strcmp(field, "id")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+				//quick_sort_id_up(event, number_events);
+			}
+			else
+			{
+			}
+		}
+		else if(strcmp(field, "level")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+			}
+			else
+			{
+			}
+		}
+		else
+		{
+			if(strcmp(order, "up")==0)
+			{
+			}
+			else
+			{
+			}
+		}
+	}
+	else
+	{	
+		if(strcmp(field, "id")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+				selection_sort(event, number_events, compare_qsort_id_up);
+			}
+			else
+			{
+
+				selection_sort(event, number_events, compare_qsort_id_down);
+			}
+		}
+		else if(strcmp(field, "level")==0)
+		{
+			if(strcmp(order, "up")==0)
+			{
+				selection_sort(event, number_events, compare_qsort_level_up);
+			}
+			else
+			{
+				selection_sort(event, number_events, compare_qsort_level_down);
+			}
+		}
+		else
+		{
+			if(strcmp(order, "up")==0)
+			{
+				selection_sort(event, number_events, compare_qsort_str_up);
+			}
+			else
+			{
+				selection_sort(event, number_events, compare_qsort_str_down);
+			}
+		}
+	}
+
 
 	for(int i = 0; i< number_events; i++)
 	{
-		//event_output(event[i]);
 	        fprintf(file_output, "---\n");
 	        fprintf(file_output, "%i\n", event[i].id);
 	        fprintf(file_output, "%i\n", event[i].level);
@@ -229,7 +374,6 @@ int main(int argc, char *argv[])
 	}
 	
 
-	//free CARS
 	for(int i =0; i < number_events; i++)
 	{
 		free(event[i].str);
@@ -242,5 +386,5 @@ int main(int argc, char *argv[])
 	free(level_str);
 	free(line);
 
-	return 1;
+	return 0;
 }
