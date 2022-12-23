@@ -35,12 +35,12 @@ void help(char *command)
 {
 	printf(
         "Usage: %s [-hafo] <input_file> <output_file>\n\n"
-        "Input file line format: <name>,<phone_number>,<time> where name is string, phone number is string with length less than 17 which consist of numerics and spaces (first symbol can be '+'), time is positive long integer\n\n"
+        "Формат входного файла: <id>,<level>,<str>, где <id> положительное число, обозначающее идентицикационный номер события, <level> - уровень важности события, представленный числом 1-5, <str> - описание произошедшего события, представленное строкой\n\n"
         "Options:\n"
         "\t-h\tShow this message.\n"
-        "\t-a\tChoose sort algorithm (qsort | name_1 | name_2)\n"
-        "\t-f\tChoose sort field (model | name | mileage)\n"
-        "\t-o\tChoose sort order (asc | desc)\n\n", 
+        "\t-a\tChoose sort algorithm (qsort | quick_sort | selection_sort)\n"
+        "\t-f\tChoose sort field (id | level | str)\n"
+        "\t-o\tChoose sort order (up | down)\n\n", 
         command);
 }
 int compare_qsort_id_up(const Event *p1, const Event *p2)
@@ -85,7 +85,7 @@ int compare_qsort_str_down(const Event *p1, const Event *p2)
 	return *p1->str - *p2->str;
 }
 
-void selection_sort(Event* event, int number_event, int(*compare_qsort_id_up)(const Event*, const Event*))
+void selection_sort(Event* event, int number_event, int(*compare)(const Event*, const Event*))
 {
 	int min;
 	Event tmp;
@@ -94,7 +94,7 @@ void selection_sort(Event* event, int number_event, int(*compare_qsort_id_up)(co
 		min = i;
 		for(int j = i; j< number_event; j++)
 		{
-			if(compare_qsort_id_up(&event[j], &event[min])<0)
+			if(compare(&event[j], &event[min])<0)
 			{
 				min = j;
 			}
@@ -103,6 +103,36 @@ void selection_sort(Event* event, int number_event, int(*compare_qsort_id_up)(co
 		event[i] = event[min];
 		event[min] = tmp;
 	}
+}
+
+void quick_sort(Event* event, int number_events, int(*compare)(const Event*, const Event*))
+{
+	int i = 0;
+	int j = number_events - 1;
+	Event mid = event[number_events / 2];
+
+	do
+	{
+		while(compare(&event[i], &mid)<0)
+			i++;
+		while(compare(&event[j], &mid)>0)
+			j--;
+
+		if(i <= j)
+		{
+			Event tmp = event[i];
+			event[i] = event[j];
+			event[j] = tmp;
+
+			i++;
+			j--;
+		}
+	} while(i<=j);
+
+	if (j>0)
+		quick_sort(event, j+1, compare);
+	if ( i < number_events)
+		quick_sort(&event[i], number_events - i, compare);
 }
 int main(int argc, char *argv[])
 {
@@ -301,28 +331,33 @@ int main(int argc, char *argv[])
 		{
 			if(strcmp(order, "up")==0)
 			{
-				//quick_sort_id_up(event, number_events);
+				quick_sort(event, number_events, compare_qsort_id_up);
 			}
 			else
 			{
+				quick_sort(event, number_events, compare_qsort_id_down);
 			}
 		}
 		else if(strcmp(field, "level")==0)
 		{
 			if(strcmp(order, "up")==0)
 			{
+				quick_sort(event, number_events, compare_qsort_level_up);
 			}
 			else
 			{
+				quick_sort(event, number_events, compare_qsort_level_down);
 			}
 		}
 		else
 		{
 			if(strcmp(order, "up")==0)
 			{
+				quick_sort(event, number_events, compare_qsort_str_up);
 			}
 			else
 			{
+				quick_sort(event, number_events, compare_qsort_str_down);
 			}
 		}
 	}
